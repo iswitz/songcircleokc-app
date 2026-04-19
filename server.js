@@ -589,6 +589,56 @@ function appHtml({ songs, currentSong, query = "", content = "", user = null }) 
         <title>Song Circle OKC Lyrics</title>
         <link rel="stylesheet" href="/styles.css">
         <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+        <script>
+          (() => {
+            let wakeLock = null;
+            const isMobile = () => window.matchMedia("(max-width: 820px), (pointer: coarse)").matches;
+
+            async function requestWakeLock() {
+              if (!isMobile() || !("wakeLock" in navigator) || document.visibilityState !== "visible") {
+                return;
+              }
+
+              try {
+                wakeLock = await navigator.wakeLock.request("screen");
+                wakeLock.addEventListener("release", () => {
+                  wakeLock = null;
+                });
+              } catch (error) {
+                wakeLock = null;
+              }
+            }
+
+            function releaseWakeLock() {
+              if (wakeLock) {
+                wakeLock.release();
+                wakeLock = null;
+              }
+            }
+
+            document.addEventListener("visibilitychange", () => {
+              if (document.visibilityState === "visible") {
+                requestWakeLock();
+              } else {
+                releaseWakeLock();
+              }
+            });
+
+            window.addEventListener("resize", () => {
+              if (isMobile()) {
+                requestWakeLock();
+              } else {
+                releaseWakeLock();
+              }
+            });
+
+            ["pointerdown", "touchstart", "click"].forEach((eventName) => {
+              window.addEventListener(eventName, requestWakeLock, { once: true, passive: true });
+            });
+
+            requestWakeLock();
+          })();
+        </script>
       </head>
       <body data-signals="${escapeAttr(signals)}" data-class:dark="$dark">
         <div class="app-shell" data-style="{'--lyric-size': $lyricSize + 'px'}">
