@@ -1,0 +1,377 @@
+:root {
+  color-scheme: light;
+  --bg: #f7f4ef;
+  --panel: #fffaf2;
+  --panel-strong: #efe6d7;
+  --ink: #25221e;
+  --muted: #71695f;
+  --accent: #2f6d62;
+  --accent-strong: #1f4e47;
+  --line: #ded4c6;
+  --lyric-size: 26px;
+  --shadow: 0 18px 42px rgba(49, 42, 34, 0.12);
+}
+
+body.dark {
+  color-scheme: dark;
+  --bg: #181614;
+  --panel: #24211d;
+  --panel-strong: #302b26;
+  --ink: #f4ede3;
+  --muted: #b6aa9b;
+  --accent: #7fb8a9;
+  --accent-strong: #b7d8ce;
+  --line: #403a33;
+  --shadow: 0 18px 42px rgba(0, 0, 0, 0.25);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.library-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 100vh;
+  padding: 28px;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+}
+
+.brand-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0;
+  font-size: 38px;
+  line-height: 1;
+}
+
+.icon-button,
+.tool-button {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-strong);
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.icon-button:hover,
+.tool-button:hover,
+.song-item:hover {
+  border-color: var(--accent);
+}
+
+.search-field input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+  outline: none;
+}
+
+.search-field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.toolbar-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.song-list {
+  display: grid;
+  gap: 10px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.song-item {
+  width: 100%;
+  min-height: 78px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+}
+
+.song-item[aria-current="true"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.song-item-title {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 850;
+}
+
+.song-item-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.lyrics-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+  padding: 34px clamp(22px, 4vw, 56px);
+}
+
+.song-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.song-meta {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+h2 {
+  margin-bottom: 0;
+  font-size: clamp(42px, 7vw, 88px);
+  line-height: 0.95;
+  letter-spacing: 0;
+}
+
+.key-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 66px;
+  height: 66px;
+  padding: 0 16px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 26px;
+  font-weight: 900;
+}
+
+body.dark .key-badge {
+  color: #13211e;
+}
+
+.set-notes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.set-notes > div {
+  min-height: 72px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.note-label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.set-notes strong {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 18px;
+}
+
+.lyrics-card {
+  flex: 1;
+  min-height: 52vh;
+  padding: clamp(22px, 4vw, 48px);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  outline: none;
+}
+
+.lyrics-card:focus {
+  border-color: var(--accent);
+}
+
+.lyrics-content {
+  column-gap: 52px;
+}
+
+.lyrics-content.columns {
+  columns: 2 360px;
+}
+
+.lyric-section {
+  break-inside: avoid;
+  margin: 0 0 34px;
+}
+
+.section-label {
+  margin-bottom: 10px;
+  color: var(--accent-strong);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.lyric-line {
+  min-height: calc(var(--lyric-size) * 1.35);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: var(--lyric-size);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.chord {
+  color: var(--accent-strong);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.72em;
+  font-weight: 900;
+  vertical-align: super;
+}
+
+.empty-state {
+  padding: 24px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+body.presenting .library-panel {
+  display: none;
+}
+
+body.presenting .app-shell {
+  grid-template-columns: 1fr;
+}
+
+body.presenting .lyrics-stage {
+  padding: 40px 5vw;
+}
+
+body.presenting .lyrics-card {
+  min-height: 62vh;
+}
+
+@media (max-width: 820px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .library-panel {
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .song-list {
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    max-height: 260px;
+  }
+
+  .song-header {
+    align-items: stretch;
+  }
+
+  .set-notes {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .library-panel,
+  .lyrics-stage {
+    padding: 20px;
+  }
+
+  .song-header {
+    flex-direction: column;
+  }
+
+  .key-badge {
+    width: 66px;
+  }
+
+  .lyrics-card {
+    padding: 20px;
+  }
+}
