@@ -455,6 +455,11 @@ function lyricsHtml(song, user) {
         </div>
         <div class="song-header-actions">
           ${user ? `<a class="tool-button" href="/songs/${encodeURIComponent(song.id)}/edit" data-on:click__prevent="@get('/songs/${encodeURIComponent(song.id)}/edit')">Edit</a>` : ""}
+          ${user ? `
+            <form class="inline-action-form" method="post" action="/songs/${encodeURIComponent(song.id)}/delete" onsubmit="return confirm('Delete this song? This cannot be undone.');">
+              <button class="tool-button danger-button" type="submit">Delete</button>
+            </form>
+          ` : ""}
           <div class="key-badge" aria-label="Song key">${escapeHtml(song.key)}</div>
         </div>
       </section>
@@ -499,7 +504,7 @@ function songFormHtml({ mode, song = null, error = "" }) {
           <a class="tool-button" href="${backUrl}" data-on:click__prevent="@get('${backUrl}')">Back</a>
         </div>
 
-        <form class="song-form" method="post" action="${action}" data-on:submit__prevent="@post('${action}', {contentType: 'form'})">
+        <form class="song-form" method="post" action="${action}">
           <label>
             <span>Title</span>
             <input name="title" type="text" value="${escapeAttr(song?.title || "")}" required autocomplete="off">
@@ -699,20 +704,20 @@ function appHtml({ songs, currentSong, query = "", content = "", user = null }) 
     </html>`;
 }
 
-function renderShell(response, request, content = "", selectedId = "") {
+function renderShell(response, request, content = "", selectedId = "", status = 200) {
   const user = getCurrentUser(request);
   const songs = loadSongs();
   const currentSong = selectedSong(songs, selectedId);
-  send(response, 200, appHtml({ songs, currentSong, content, user }));
+  send(response, status, appHtml({ songs, currentSong, content, user }));
 }
 
-function guardedContent(response, request, content) {
+function guardedContent(response, request, content, selectedId = "", status = 200) {
   if (isDatastarRequest(request)) {
-    send(response, 200, content);
+    send(response, status, content);
     return;
   }
 
-  renderShell(response, request, content);
+  renderShell(response, request, content, selectedId, status);
 }
 
 function requireUser(response, request, next = request.url) {
@@ -738,14 +743,14 @@ function createSong(request, response, user) {
     const payload = getSongPayload(form);
 
     if (payload.error) {
-      send(response, 400, songFormHtml({ mode: "add", song: form, error: payload.error }));
+      guardedContent(response, request, songFormHtml({ mode: "add", song: form, error: payload.error }), "", 400);
       return;
     }
 
     const existing = db.prepare("SELECT id FROM songs WHERE slug = ?").get(payload.slug);
 
     if (existing) {
-      send(response, 409, songFormHtml({ mode: "add", song: form, error: "A song with that title already exists." }));
+      guardedContent(response, request, songFormHtml({ mode: "add", song: form, error: "A song with that title already exists." }), "", 409);
       return;
     }
 
@@ -773,21 +778,21 @@ function updateSong(request, response, user, currentSlug) {
     const payload = getSongPayload(form);
 
     if (payload.error) {
-      send(response, 400, songFormHtml({ mode: "edit", song: { ...form, id: currentSlug }, error: payload.error }));
+      guardedContent(response, request, songFormHtml({ mode: "edit", song: { ...form, id: currentSlug }, error: payload.error }), currentSlug, 400);
       return;
     }
 
     const current = db.prepare("SELECT * FROM songs WHERE slug = ?").get(currentSlug);
 
     if (!current) {
-      send(response, 404, lyricsHtml(null, user));
+      guardedContent(response, request, lyricsHtml(null, user), "", 404);
       return;
     }
 
     const duplicate = db.prepare("SELECT id FROM songs WHERE slug = ? AND slug != ?").get(payload.slug, currentSlug);
 
     if (duplicate) {
-      send(response, 409, songFormHtml({ mode: "edit", song: { ...form, id: currentSlug }, error: "A song with that title already exists." }));
+      guardedContent(response, request, songFormHtml({ mode: "edit", song: { ...form, id: currentSlug }, error: "A song with that title already exists." }), currentSlug, 409);
       return;
     }
 
@@ -811,6 +816,27 @@ function updateSong(request, response, user, currentSlug) {
   });
 }
 
+function deleteSong(request, response, user, currentSlug) {
+  const current = db.prepare("SELECT * FROM songs WHERE slug = ?").get(currentSlug);
+
+  if (!current) {
+    guardedContent(response, request, lyricsHtml(null, user), "", 404);
+    return;
+  }
+
+  db.prepare("DELETE FROM songs WHERE slug = ?").run(currentSlug);
+
+  const songs = loadSongs();
+  const currentSong = selectedSong(songs, "");
+
+  if (isDatastarRequest(request)) {
+    send(response, 200, `${songListHtml(songs, currentSong?.id || "")}${lyricsHtml(currentSong, user)}`);
+    return;
+  }
+
+  redirect(response, currentSong ? `/songs/${encodeURIComponent(currentSong.id)}` : "/songs");
+}
+
 async function createAccount(request, response) {
   const form = await readForm(request);
   const email = String(form.email || "").trim().toLowerCase();
@@ -818,7 +844,7 @@ async function createAccount(request, response) {
   const next = String(form.next || "/");
 
   if (!email || password.length < 8) {
-    send(response, 400, authFormHtml({ mode: "signup", next, error: "Use an email and a password with at least 8 characters." }));
+    guardedContent(response, request, authFormHtml({ mode: "signup", next, error: "Use an email and a password with at least 8 characters." }), "", 400);
     return;
   }
 
@@ -829,8 +855,8 @@ async function createAccount(request, response) {
     const session = createSession(result.lastInsertRowid);
     redirect(response, next, { "Set-Cookie": sessionCookie(session.token, session.expiresAt) });
   } catch (error) {
-    if (error.code === "ERR_SQLITE_CONSTRAINT_UNIQUE") {
-      send(response, 409, authFormHtml({ mode: "signup", next, error: "An account already exists for that email." }));
+    if (error.code === "ERR_SQLITE_CONSTRAINT_UNIQUE" || error.message?.includes("UNIQUE constraint failed: users.email")) {
+      guardedContent(response, request, authFormHtml({ mode: "signup", next, error: "An account already exists for that email." }), "", 409);
       return;
     }
 
@@ -846,7 +872,7 @@ async function login(request, response) {
   const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
 
   if (!user || !verifyPassword(password, user)) {
-    send(response, 401, authFormHtml({ mode: "login", next, error: "Email or password is incorrect." }));
+    guardedContent(response, request, authFormHtml({ mode: "login", next, error: "Email or password is incorrect." }), "", 401);
     return;
   }
 
@@ -1001,6 +1027,18 @@ const server = http.createServer(async (request, response) => {
       }
 
       updateSong(request, response, authedUser, updateMatch[1]);
+      return;
+    }
+
+    const deleteMatch = requestPath.match(/^\/songs\/([^/]+)\/delete$/);
+    if (request.method === "POST" && deleteMatch) {
+      const authedUser = requireUser(response, request, `/songs/${deleteMatch[1]}`);
+
+      if (!authedUser) {
+        return;
+      }
+
+      deleteSong(request, response, authedUser, deleteMatch[1]);
       return;
     }
 

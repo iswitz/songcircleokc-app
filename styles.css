@@ -145,6 +145,22 @@ h1 {
   border-color: var(--accent);
 }
 
+.inline-action-form {
+  display: inline-grid;
+}
+
+.danger-button {
+  color: #a1261d;
+}
+
+.danger-button:hover {
+  border-color: #c83f34;
+}
+
+body.dark .danger-button {
+  color: #ff9a8f;
+}
+
 .add-song-button {
   width: 100%;
   background: var(--accent);
