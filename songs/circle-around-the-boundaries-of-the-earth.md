@@ -17,4 +17,5 @@ Wearing my long wing feathers as I fly
 I circle around
 I circle around
 The boundaries of the Earth
+
 (repeat)

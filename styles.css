@@ -64,6 +64,7 @@ button {
 
 .app-shell {
   display: grid;
+  align-items: start;
   grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
   min-height: 100vh;
 }
@@ -75,10 +76,14 @@ button {
 }
 
 .library-panel {
+  position: sticky;
+  top: 0;
   display: flex;
   flex-direction: column;
   gap: 18px;
+  height: 100vh;
   min-height: 100vh;
+  overflow-y: auto;
   padding: 28px;
   background: var(--panel);
   border-right: 1px solid var(--line);
@@ -239,6 +244,7 @@ body.dark .add-song-button {
 .song-item {
   display: block;
   width: 100%;
+  min-width: 0;
   min-height: 78px;
   padding: 12px;
   border: 1px solid var(--line);
@@ -254,9 +260,14 @@ body.dark .add-song-button {
 }
 
 .song-item-title {
-  display: block;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
   margin-bottom: 6px;
   font-weight: 850;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .song-item-meta {
@@ -265,6 +276,13 @@ body.dark .add-song-button {
   gap: 10px;
   color: var(--muted);
   font-size: 13px;
+}
+
+.song-item-meta span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .lyrics-stage {
@@ -282,9 +300,15 @@ body.dark .add-song-button {
   gap: 20px;
 }
 
+.song-header > div:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .song-header-actions {
   display: flex;
   align-items: center;
+  flex: 0 0 auto;
   gap: 10px;
 }
 
@@ -293,6 +317,17 @@ body.dark .add-song-button {
   color: var(--muted);
   font-size: 15px;
   font-weight: 700;
+}
+
+.song-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: clamp(30px, 4vw, 52px);
+  line-height: 1.05;
+  max-width: 100%;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 h2 {
@@ -637,6 +672,11 @@ body.presenting .lyrics-card {
 
   .song-header {
     flex-direction: column;
+  }
+
+  .song-title {
+    max-width: 100%;
+    font-size: clamp(24px, 7vw, 32px);
   }
 
   .song-header-actions {

@@ -455,7 +455,7 @@ function lyricsHtml(song, user) {
       <section class="song-header" aria-live="polite">
         <div>
           <p class="song-meta">${escapeHtml(song.origin)}</p>
-          <h2>${escapeHtml(song.title)}</h2>
+          <h2 class="song-title">${escapeHtml(song.title)}</h2>
         </div>
         <div class="song-header-actions">
           ${user ? `<a class="tool-button" href="/songs/${encodeURIComponent(song.id)}/edit" data-on:click__prevent="@get('/songs/${encodeURIComponent(song.id)}/edit')">Edit</a>` : ""}

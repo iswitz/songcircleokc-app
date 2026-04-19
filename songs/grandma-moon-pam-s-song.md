@@ -6,11 +6,7 @@ youtube:
 ---
 
 Grandma moon, sister sun
-
 Mother earth, we are one
-
 Let us move, to heal the earth
-
 Know the moon, touch the sun
-
 Heal as one

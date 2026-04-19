@@ -17,7 +17,7 @@ Onward..Inward..Creature to creation
 Holy Mystery. Mother Earth- Child Birth
 This is nature! This is sacred. 
 
-## (Chorus)
+(Chorus)
 
 ## Verse 2
 We are spinning- spinning all together
@@ -25,7 +25,7 @@ We are singing …..over the rainbow
 This is harmony. This is community.
 This celebration! This is sacred. 
 
-## (Chorus)
+(Chorus)
 
 ## Verse 3
 We are ripening – ripening together
@@ -33,4 +33,4 @@ Babies, elders, bozos, and angels!
 This is how we grow, this is how we get to know
 This is celebration! This is sacred. 
 
-## (Chorus)
+(Chorus)
