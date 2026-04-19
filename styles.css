@@ -9,6 +9,7 @@
   --accent-strong: #1f4e47;
   --line: #ded4c6;
   --lyric-size: 26px;
+  --mobile-menu-height: 58px;
   --shadow: 0 18px 42px rgba(49, 42, 34, 0.12);
 }
 
@@ -42,8 +43,18 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
+}
+
+button,
+a {
+  color: inherit;
+}
+
+a {
+  text-decoration: none;
 }
 
 button {
@@ -54,6 +65,12 @@ button {
   display: grid;
   grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
   min-height: 100vh;
+}
+
+.menu-button,
+.close-menu-button,
+.menu-backdrop {
+  display: none;
 }
 
 .library-panel {
@@ -71,6 +88,16 @@ button {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+}
+
+.close-menu-button {
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-strong);
+  color: var(--ink);
+  font-weight: 800;
 }
 
 .eyebrow {
@@ -95,7 +122,9 @@ h1 {
 }
 
 .icon-button,
-.tool-button {
+.tool-button,
+.add-song-button,
+.primary-button {
   display: inline-grid;
   place-items: center;
   min-width: 44px;
@@ -110,8 +139,55 @@ h1 {
 
 .icon-button:hover,
 .tool-button:hover,
+.add-song-button:hover,
+.primary-button:hover,
 .song-item:hover {
   border-color: var(--accent);
+}
+
+.add-song-button {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+}
+
+body.dark .add-song-button {
+  color: #13211e;
+}
+
+.add-song-button[aria-pressed="true"] {
+  outline: 3px solid color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.auth-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 42px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.auth-bar a,
+.text-button,
+.auth-switch a {
+  border: 0;
+  background: transparent;
+  color: var(--accent-strong);
+  font-weight: 900;
+}
+
+.auth-bar form {
+  margin: 0;
+}
+
+.text-button {
+  padding: 0;
 }
 
 .search-field input {
@@ -144,6 +220,7 @@ h1 {
 }
 
 .song-item {
+  display: block;
   width: 100%;
   min-height: 78px;
   padding: 12px;
@@ -188,6 +265,12 @@ h1 {
   gap: 20px;
 }
 
+.song-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .song-meta {
   margin-bottom: 8px;
   color: var(--muted);
@@ -217,35 +300,6 @@ h2 {
 
 body.dark .key-badge {
   color: #13211e;
-}
-
-.set-notes {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.set-notes > div {
-  min-height: 72px;
-  padding: 12px 14px;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-
-.note-label {
-  display: block;
-  margin-bottom: 5px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.set-notes strong {
-  display: block;
-  overflow-wrap: anywhere;
-  font-size: 18px;
 }
 
 .lyrics-card {
@@ -301,6 +355,131 @@ body.dark .key-badge {
   vertical-align: super;
 }
 
+.video-embed {
+  margin-top: 42px;
+}
+
+.video-embed:empty {
+  display: none;
+}
+
+.video-embed iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: 8px;
+  background: #000;
+}
+
+.form-view {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.form-view[hidden] {
+  display: none;
+}
+
+.form-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.song-form {
+  display: grid;
+  gap: 18px;
+  max-width: 920px;
+  padding: clamp(22px, 4vw, 42px);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.auth-form {
+  max-width: 540px;
+}
+
+.song-form label {
+  display: grid;
+  gap: 8px;
+}
+
+.song-form label span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.song-form input,
+.song-form textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+  outline: none;
+}
+
+.song-form input {
+  min-height: 48px;
+  padding: 0 14px;
+}
+
+.song-form textarea {
+  min-height: 360px;
+  padding: 14px;
+  resize: vertical;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20px;
+  line-height: 1.4;
+}
+
+.song-form input:focus,
+.song-form textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(120px, 1fr);
+  gap: 14px;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.primary-button {
+  min-width: 132px;
+  background: var(--accent);
+  color: #fff;
+}
+
+body.dark .primary-button {
+  color: #13211e;
+}
+
+.form-status {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.auth-switch {
+  margin: 0;
+  color: var(--muted);
+}
+
 .empty-state {
   padding: 24px;
   color: var(--muted);
@@ -337,34 +516,114 @@ body.presenting .lyrics-card {
     grid-template-columns: 1fr;
   }
 
-  .library-panel {
-    min-height: auto;
-    border-right: 0;
+  .menu-button {
+    position: sticky;
+    top: 0;
+    z-index: 35;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: var(--mobile-menu-height);
+    padding: 0 18px;
+    border: 0;
     border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    background: var(--panel);
+    color: var(--ink);
+    box-shadow: none;
+    font-weight: 900;
+  }
+
+  .hamburger-lines {
+    display: grid;
+    gap: 4px;
+  }
+
+  .hamburger-lines span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--ink);
+  }
+
+  .menu-button[aria-expanded="true"] {
+    color: var(--accent-strong);
+  }
+
+  .menu-backdrop {
+    position: fixed;
+    inset: var(--mobile-menu-height) 0 0;
+    z-index: 20;
+    background: rgba(0, 0, 0, 0.34);
+  }
+
+  .menu-backdrop:not([hidden]) {
+    display: block;
+  }
+
+  .library-panel {
+    position: fixed;
+    inset: var(--mobile-menu-height) auto 0 0;
+    z-index: 30;
+    width: min(88vw, 360px);
+    height: calc(100vh - var(--mobile-menu-height));
+    min-height: 0;
+    overflow-y: auto;
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+    box-shadow: var(--shadow);
+    transform: translateX(-105%);
+    transition: transform 180ms ease;
+  }
+
+  .library-panel.open {
+    transform: translateX(0);
+  }
+
+  .close-menu-button {
+    display: inline-grid;
+    place-items: center;
   }
 
   .song-list {
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    max-height: 260px;
+    grid-template-columns: 1fr;
+    max-height: none;
+  }
+
+  .lyrics-stage {
+    padding-top: 34px;
   }
 
   .song-header {
     align-items: stretch;
   }
 
-  .set-notes {
+  .form-grid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 560px) {
-  .library-panel,
   .lyrics-stage {
+    padding: 20px;
+  }
+
+  .lyrics-stage {
+    padding-top: 20px;
+  }
+
+  .library-panel {
     padding: 20px;
   }
 
   .song-header {
     flex-direction: column;
+  }
+
+  .song-header-actions {
+    justify-content: space-between;
   }
 
   .key-badge {
@@ -373,5 +632,11 @@ body.presenting .lyrics-card {
 
   .lyrics-card {
     padding: 20px;
+  }
+
+  .form-header,
+  .form-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

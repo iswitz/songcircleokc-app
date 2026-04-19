@@ -1,0 +1,13 @@
+node_modules/
+.env
+
+# Runtime SQLite data. Persist this directory on the host, but do not commit it.
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Local logs and OS/editor files.
+*.log
+.DS_Store
+Thumbs.db
