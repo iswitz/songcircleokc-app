@@ -95,6 +95,10 @@ function parseCookies(cookieHeader = "") {
   }).filter(([name]) => name));
 }
 
+function themePreference(request) {
+  return parseCookies(request.headers.cookie).theme === "dark";
+}
+
 function sessionCookie(token, expiresAt) {
   const secure = isProduction ? "; Secure" : "";
   return `session=${encodeURIComponent(token)}; HttpOnly; SameSite=Lax; Path=/; Expires=${new Date(expiresAt).toUTCString()}${secure}`;
@@ -582,9 +586,9 @@ function authFormHtml({ mode, error = "", next = "/" }) {
   `;
 }
 
-function appHtml({ songs, currentSong, query = "", content = "", user = null }) {
+function appHtml({ songs, currentSong, query = "", content = "", user = null, dark = false }) {
   const currentSongId = currentSong?.id || "";
-  const signals = `{query: ${JSON.stringify(query)}, dark: false, columns: false, lyricSize: 26, menuOpen: false}`;
+  const signals = `{query: ${JSON.stringify(query)}, dark: ${dark ? "true" : "false"}, columns: false, lyricSize: 26, menuOpen: false}`;
 
   return `<!doctype html>
     <html lang="en">
@@ -594,6 +598,33 @@ function appHtml({ songs, currentSong, query = "", content = "", user = null }) 
         <title>Song Circle OKC Lyrics</title>
         <link rel="stylesheet" href="/styles.css">
         <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+        <script>
+          (() => {
+            const maxAge = 60 * 60 * 24 * 365;
+            const themeCookie = (isDark) => {
+              document.cookie = "theme=" + (isDark ? "dark" : "light") + "; Path=/; Max-Age=" + maxAge + "; SameSite=Lax";
+            };
+            const storedTheme = localStorage.getItem("song-circle-theme");
+
+            if (storedTheme === "dark" || storedTheme === "light") {
+              document.documentElement.dataset.theme = storedTheme;
+              themeCookie(storedTheme === "dark");
+            }
+
+            window.addEventListener("click", (event) => {
+              if (!event.target.closest("[data-theme-toggle]")) {
+                return;
+              }
+
+              window.setTimeout(() => {
+                const isDark = document.body.classList.contains("dark");
+                document.documentElement.dataset.theme = isDark ? "dark" : "light";
+                localStorage.setItem("song-circle-theme", isDark ? "dark" : "light");
+                themeCookie(isDark);
+              }, 0);
+            });
+          })();
+        </script>
         <script>
           (() => {
             let wakeLock = null;
@@ -645,7 +676,7 @@ function appHtml({ songs, currentSong, query = "", content = "", user = null }) 
           })();
         </script>
       </head>
-      <body data-signals="${escapeAttr(signals)}" data-class:dark="$dark">
+      <body class="${dark ? "dark" : ""}" data-signals="${escapeAttr(signals)}" data-class:dark="$dark">
         <div class="app-shell" data-style="{'--lyric-size': $lyricSize + 'px'}">
           <button
             class="menu-button"
@@ -689,7 +720,7 @@ function appHtml({ songs, currentSong, query = "", content = "", user = null }) 
             <div class="toolbar-row" aria-label="Lyrics controls">
               <button class="tool-button" type="button" aria-label="Decrease lyric size" title="Decrease lyric size" data-on:click="$lyricSize = Math.max(18, $lyricSize - 2)">A-</button>
               <button class="tool-button" type="button" aria-label="Increase lyric size" title="Increase lyric size" data-on:click="$lyricSize = Math.min(42, $lyricSize + 2)">A+</button>
-              <button class="tool-button" type="button" aria-label="Toggle dark mode" title="Toggle dark mode" data-on:click="$dark = !$dark" data-text="$dark ? 'Light' : 'Dark'">Dark</button>
+              <button class="tool-button" type="button" aria-label="Toggle dark mode" title="Toggle dark mode" data-theme-toggle data-on:click="$dark = !$dark" data-text="$dark ? 'Light' : 'Dark'">Dark</button>
               <button class="tool-button" type="button" aria-label="Toggle lyric columns" title="Toggle lyric columns" data-on:click="$columns = !$columns">Cols</button>
             </div>
 
@@ -708,7 +739,7 @@ function renderShell(response, request, content = "", selectedId = "", status = 
   const user = getCurrentUser(request);
   const songs = loadSongs();
   const currentSong = selectedSong(songs, selectedId);
-  send(response, status, appHtml({ songs, currentSong, content, user }));
+  send(response, status, appHtml({ songs, currentSong, content, user, dark: themePreference(request) }));
 }
 
 function guardedContent(response, request, content, selectedId = "", status = 200) {
@@ -925,7 +956,7 @@ const server = http.createServer(async (request, response) => {
     if (request.method === "GET" && requestPath === "/") {
       const songs = loadSongs();
       const currentSong = selectedSong(songs, "");
-      send(response, 200, appHtml({ songs, currentSong, user }));
+      send(response, 200, appHtml({ songs, currentSong, user, dark: themePreference(request) }));
       return;
     }
 
@@ -964,7 +995,7 @@ const server = http.createServer(async (request, response) => {
       const songs = loadSongs();
       const currentSong = selectedSong(songs, "");
       const content = `${songListHtml(songs, currentSong?.id || "")}${lyricsHtml(currentSong, user)}`;
-      send(response, 200, isDatastarRequest(request) ? content : appHtml({ songs, currentSong, user }));
+      send(response, 200, isDatastarRequest(request) ? content : appHtml({ songs, currentSong, user, dark: themePreference(request) }));
       return;
     }
 
@@ -1003,7 +1034,7 @@ const server = http.createServer(async (request, response) => {
       const songs = loadSongs();
       const currentSong = selectedSong(songs, songMatch[1]);
       const content = `${songListHtml(songs, currentSong?.id || "")}${lyricsHtml(currentSong, user)}`;
-      send(response, 200, isDatastarRequest(request) ? content : appHtml({ songs, currentSong, user }));
+      send(response, 200, isDatastarRequest(request) ? content : appHtml({ songs, currentSong, user, dark: themePreference(request) }));
       return;
     }
 
